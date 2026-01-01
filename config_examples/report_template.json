@@ -1,0 +1,85 @@
+{
+  "session_info": {
+    "start_time": "2025-12-30T18:46:20.865706",
+    "end_time": "2025-12-30T18:46:40.003344",
+    "duration_seconds": 19.14,
+    "commands_executed": 2,
+    "session_name": "bisync_batch"
+  },
+  "commands": [
+    {
+      "command_info": {
+        "command_number": 1,
+        "timestamp": "2025-12-30T18:46:20.866801",
+        "command": "bisync",
+        "source": "\\\\192.168.20.111\\wrk\\backuptest\\test-folder",
+        "destination": "agdrive:backuptest\\test-folder",
+        "resync": false,
+        "returncode": 0
+      },
+      "summary": {
+        "total_operations": 3,
+        "operations_by_type": {
+          "conflict": 1,
+          "copy": 2
+        },
+        "operations_by_object_type": {
+          "*drive.Object": 1,
+          "*local.Object": 1
+        },
+        "operations_by_direction": {
+          "Path2 winner": 1
+        }
+      },
+      "operations": [
+        {
+          "type": "conflict",
+          "object": "library/TEST-REMOTE-EDIT.txt",
+          "size": null,
+          "timestamp": "2025-12-30T18:46:28.6467386+01:00",
+          "msg": null,
+          "objectType": null,
+          "direction": null,
+          "error": "md5 differ",
+          "winner": "Path2"
+        },
+        {
+          "type": "copy",
+          "object": "library/TEST-REMOTE-EDIT.txt",
+          "size": 162,
+          "timestamp": "2025-12-30T18:46:31.3081202+01:00",
+          "msg": "Copied (new)",
+          "objectType": "*drive.Object",
+          "direction": "Path2 winner"
+        },
+        {
+          "type": "copy",
+          "object": "library/TEST-REMOTE-EDIT.txt.conflict1",
+          "size": 320,
+          "timestamp": "2025-12-30T18:46:34.2140578+01:00",
+          "msg": "Copied (new)",
+          "objectType": "*local.Object",
+          "direction": null
+        }
+      ]
+    },
+    {
+      "command_info": {
+        "command_number": 2,
+        "timestamp": "2025-12-30T18:46:37.659113",
+        "command": "bisync",
+        "source": "\\\\192.168.20.111\\wrk\\backuptest\\dummy-folder",
+        "destination": "agdrive:backuptest\\dummy-folder",
+        "resync": false,
+        "returncode": 0
+      },
+      "summary": {
+        "total_operations": 0,
+        "operations_by_type": {},
+        "operations_by_object_type": {},
+        "operations_by_direction": {}
+      },
+      "operations": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "remote": "agdrive",
+  "one_way": false,
+  "download": false,
+  "checksum": true,
+  "size_only": false,
+  "filters": {
+    "exclude": [
+      "~*",
+      "*.tmp"
+    ],
+    "exclude_dirs": []
+  },
+  "folders": [
+    {
+      "source": "\\\\192.168.20.111\\wrk\\atlas\\_alex_giov_\\guitar\\guitar_new\\backingtracks",
+      "destination": "agdrive:backuptest\\atlas\\_alex_giov_\\guitar\\guitar_new\\backingtracks"
+    },
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\dummy-folder",
+      "destination": "agdrive:backuptest\\dummy-folder",
+      "one_way": true,
+      "download": true
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Bisync state files
+bisync_state/
+bisync_backups/
+
+# Backup archives
+*.7z
+*.zip
+
+# Config files (user-specific)
+config/backup.json
+config/bisync.json
+config/sync.json
+!config_examples/*.json
+
+# OS
+.DS_Store
+Thumbs.db

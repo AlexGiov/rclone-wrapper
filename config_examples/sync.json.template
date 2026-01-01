@@ -1,0 +1,31 @@
+{
+  "remote": "agdrive",
+  "checksum": true,
+  "size_only": false,
+  "modtime_and_size": false,
+  "filters": {
+    "exclude": [
+      "~*",
+      "*.swp"
+    ],
+    "exclude_dirs": []
+  },
+  "folders": [
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\test-folder",
+      "destination": "agdrive:backuptest\\test-folder"
+    },
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\dummy-folder",
+      "destination": "agdrive:backuptest\\dummy-folder",
+      "filters": {
+        "exclude": [
+          "node_modules/**",
+          "*.tmp"
+        ]
+      },
+      "size_only": true,
+      "checksum": false
+    }
+  ]
+}

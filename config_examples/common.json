@@ -1,0 +1,36 @@
+{
+  "remote": "agdrive",
+  "rclone_path": "rclone",
+  "log_dir": "logs",
+  "log_level": "INFO",
+  "bwlimit": "100M",
+  "transfers": 4,
+  "checkers": 8,
+  "timeout": 7200,
+  "dry_run": false,
+  "extra_flags": [],
+  "filters": {
+    "exclude": [
+      "*.tmp",
+      "*.bak",
+      ".DS_Store",
+      "Thumbs.db",
+      "desktop.ini"
+    ],
+    "include": [],
+    "exclude_dirs": [
+      ".git",
+      "node_modules",
+      "__pycache__",
+      ".venv",
+      "venv"
+    ],
+    "exclude_if_present": null,
+    "min_size": null,
+    "max_size": null,
+    "min_age": null,
+    "max_age": null,
+    "filter_from": null,
+    "ignore_case": false
+  }
+}

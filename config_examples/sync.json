@@ -1,0 +1,22 @@
+{
+  "remote": "agdrive",
+  "checksum": true,
+  "size_only": false,
+  "modtime_and_size": false,
+  "filters": {
+    "exclude": [
+      "~*",
+      "*.swp"
+    ],
+    "exclude_dirs": []
+  },
+  "folders": [
+    {
+      "source": "\\\\192.168.20.111\\wrk\\atlas\\_alex_giov_\\guitar\\guitar\\youtube backingtrack\\elevated",
+      "destination": "agdrive:atlas\\_alex_giov_\\guitar\\guitar\\youtube backingtrack\\elevated",
+      "checksum": false,
+      "size_only": false,
+      "modtime_and_size": true
+    }
+  ]
+}

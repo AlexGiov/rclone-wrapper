@@ -1,0 +1,9 @@
+{
+  "dest_base": "backuptest/archives",
+  "zip_prefix": "backup",
+  "retention_days": 30,
+  "folders": [
+    "C:\\Users\\alexgiov\\Desktop\\trash\\New folder",
+    "C:\\Users\\alexgiov\\Pictures"
+  ]
+}

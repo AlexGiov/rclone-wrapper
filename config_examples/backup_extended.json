@@ -1,0 +1,80 @@
+{
+  "dest_base": "backuptest/archives",
+  "filters": {
+    "exclude": [
+      "*.tmp",
+      "*.bak",
+      "~*",
+      "*.swp"
+    ],
+    "include": [],
+    "exclude_dirs": [
+      ".git",
+      "node_modules",
+      "__pycache__",
+      ".vscode",
+      ".idea"
+    ],
+    "exclude_if_present": null,
+    "min_size": null,
+    "max_size": null,
+    "min_age": null,
+    "max_age": null,
+    "filter_from": null,
+    "ignore_case": false
+  },
+  "max_retention_days": 30,
+  "archives": [
+    {
+      "source": [
+        "C:\\Users\\alexgiov\\Desktop\\trash\\a1",
+        "C:\\Users\\alexgiov\\Desktop\\trash\\a2"
+      ],
+      "destination": "a1a2_archive",
+      "filters": {
+        "exclude": [
+          "*.log"
+        ],
+        "include": [],
+        "exclude_dirs": [],
+        "exclude_if_present": null,
+        "min_size": null,
+        "max_size": null,
+        "min_age": null,
+        "max_age": null,
+        "filter_from": null,
+        "ignore_case": false
+      },
+      "retention_days": 15,
+      "merge_zip": true,
+      "compression_level": 6,
+      "enabled": true,
+      "description": "Documents backup - merged into single archive"
+    },
+    {
+      "source": [
+        "C:\\Users\\alexgiov\\Desktop\\trash\\a3",
+        "C:\\Users\\alexgiov\\Desktop\\trash\\a4"
+      ],
+      "destination": "a3a4_archive",
+      "filters": null,
+      "retention_days": 7,
+      "merge_zip": false,
+      "compression_level": 9,
+      "enabled": true,
+      "description": "Test folder - separate zip files"
+    },
+    {
+      "source": [
+        "C:\\Users\\alexgiov\\Desktop\\trash\\a5"
+      ],
+      "destination": "a5_archive",
+      "filters": null,
+      "retention_days": 7,
+      "merge_zip": false,
+      "compression_level": 9,
+      "enabled": true,
+      "description": "Test folder - separate zip files"
+    }
+  ]
+}

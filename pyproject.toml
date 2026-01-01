@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_backend"
+
+[project]
+name = "rclone-wrapper"
+version = "1.0.0"
+description = "Professional Python wrapper for rclone with bisync, backup, and sync support"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["rclone", "backup", "sync", "bisync", "cloud", "storage"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Archiving :: Backup",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+]
+
+[project.scripts]
+rclone-wrapper = "cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/rclone-wrapper"
+Documentation = "https://github.com/yourusername/rclone-wrapper#readme"
+Repository = "https://github.com/yourusername/rclone-wrapper"
+Issues = "https://github.com/yourusername/rclone-wrapper/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rclone_wrapper*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.coverage.run]
+source = ["rclone_wrapper"]

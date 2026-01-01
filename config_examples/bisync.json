@@ -1,0 +1,44 @@
+{
+  "remote": "agdrive",
+  "state_dir": "bisync_state",
+  "backup_dir": "bisync_backups",
+  "resilient": true,
+  "recover": true,
+  "force": true,
+  "max_lock": "2m",
+  "conflict_resolve": "newer",
+  "conflict_loser": "num",
+  "conflict_suffix": "conflict",
+  "resync_mode": "newer",
+  "compare": ["size", "modtime"],
+  "create_empty_src_dirs": true,
+  "checksum": true,
+  "filters": {
+    "exclude": [
+      "~*",
+      "*.swp",
+      "*.log"
+    ],
+    "exclude_dirs": [
+      ".vscode",
+      ".idea"
+    ],
+    "exclude_if_present": ".nomedia"
+  },
+  "folders": [
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\test-folder",
+      "destination": "agdrive:backuptest\\test-folder"
+    },
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\dummy-folder",
+      "destination": "agdrive:backuptest\\dummy-folder",
+      "filters": {
+        "exclude": [
+          "*.pdf"
+        ]
+      },
+      "checksum": true
+    }
+  ]
+}
