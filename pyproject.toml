@@ -41,7 +41,7 @@ dev = [
 ]
 
 [project.scripts]
-rclone-wrapper = "cli:main"
+rclone-wrapper = "rclone_wrapper.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/yourusername/rclone-wrapper"

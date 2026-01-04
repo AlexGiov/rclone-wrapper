@@ -6,15 +6,24 @@ Type-safe, robust wrapper for rclone with comprehensive error handling, retry lo
 
 ## ✨ Features
 
-- **Type-Safe**: Full type hints with Pydantic validation
-- **Robust Error Handling**: Comprehensive exception hierarchy with exit code mapping
-- **Retry Logic**: Automatic retry with exponential backoff for transient errors
-- **Bisync Support**: Full bidirectional sync with conflict detection and auto-resync
-- **JSON Logging**: Structured log parsing with raw JSON log preservation
-- **Backup Management**: ZIP archiving with retention policy
-- **Flexible Logging**: Multi-level logging with file rotation
-- **CLI Interface**: Complete command-line interface for all operations
-- **Well-Tested**: Comprehensive test suite with 80%+ coverage
+### Architecture
+- **Modern Python 3.11+**: PEP 585/604 type hints, dataclasses, Protocol-based design
+- **Domain-Driven Design**: Layered architecture (Domain, Core, Config, Operations, Logging)
+- **SOLID Principles**: Single Responsibility, Dependency Injection, Open/Closed
+- **Design Patterns**: Builder, Factory, Strategy, Template Method, Context Manager
+
+### Operations
+- **Backup Extended**: Multi-archive ZIP backup with individual retention policies
+- **Sync**: One-way synchronization with filtering and error recovery
+- **Bisync**: Bidirectional sync with conflict detection and auto-recovery
+- **Compare**: Directory comparison for audit and verification
+
+### Developer Experience
+- **Type-Safe**: Full type hints with Pydantic 2.0+ validation
+- **Comprehensive Logging**: RcloneOutputAnalyzer with JSON parsing and aggregated reports
+- **CLI & API**: Three usage modes (direct script, module, installed command)
+- **Interactive Examples**: Batch/shell scripts demonstrating all features
+- **Extensive Documentation**: Working examples for all operations
 
 ## 📋 Requirements
 
@@ -37,63 +46,81 @@ pip install -e .
 
 ## 🎯 Quick Start
 
-### Configuration
+### Interactive CLI Demo
 
-Create `config/backup.json`:
-
-```json
-{
-  "remote": "gdrive",
-  "dest_base": "Backup",
-  "folders": ["D:/Documents", "D:/Photos"],
-  "retention_days": 30,
-  "log_level": "INFO"
-}
+**Windows:**
+```bash
+examples\example_cli_usage.bat
 ```
 
-### Basic Operations
+**Linux/macOS:**
+```bash
+chmod +x examples/example_cli_usage.sh
+./examples/example_cli_usage.sh
+```
+
+### Configuration
+
+Example configurations are provided in `config_examples/`. Copy and customize for your use:
 
 ```bash
-# Backup folders to remote
-python cli.py backup --config config/backup.json
+mkdir config
+cp config_examples/sync.json config/
+cp config_examples/bisync.json config/
+cp config_examples/backup_extended.json config/
+```
 
-# Sync folder to remote
-python cli.py sync --local "D:/Projects" --remote "gdrive:Projects"
+### Three Ways to Use
 
-# Bidirectional sync (bisync)
-python cli.py bisync --path1 "D:/Work" --path2 "gdrive:Work"
+**1. Direct Script (Easiest):**
+```bash
+python rclone-wrapper.py backup --config-dir config_examples
+python rclone-wrapper.py sync --config-dir config_examples
+python rclone-wrapper.py bisync --config-dir config_examples
+python rclone-wrapper.py compare --config-dir config_examples
+```
 
-# Compare directories
-python cli.py compare --local "D:/folder" --remote "gdrive:folder"
+**2. Python Module (Standard):**
+```bash
+python -m rclone_wrapper backup --config-dir config_examples
+python -m rclone_wrapper sync --config-dir config_examples --dry-run
+```
+
+**3. Installed Command (After `pip install .`):**
+```bash
+rclone-wrapper backup
+rclone-wrapper sync --verbose
+rclone-wrapper bisync --resync
 ```
 
 ## 📖 Detailed Usage
 
-### Backup Operation
+### Backup Operation (Extended)
 
-Archive local folders and upload to remote with retention:
+Multi-archive backup with ZIP compression and retention policies:
 
 ```bash
-python cli.py backup \
-    --config config/backup.json \
-    --dry-run  # Preview only
+python rclone-wrapper.py backup --config-dir config_examples
 ```
 
 **Features:**
-- Creates ZIP archives locally
-- Uploads to remote
-- Maintains retention policy (deletes old backups)
-- Preserves JSON logs for audit
+- Multiple independent archives with different retention
+- ZIP compression (configurable levels 0-9)
+- Merge multiple folders into single ZIP or separate ZIPs
+- Automatic cleanup of old backups based on retention policy
+- Global and per-archive filters
+- Unified JSON reporting
+
+**Configuration:** `config_examples/backup_extended.json`
+
+See [examples/example_backup_extended.py](examples/example_backup_extended.py) for Python API usage.
 
 ### Sync Operation
 
 One-way sync from local to remote:
 
 ```bash
-python cli.py sync \
-    --local "D:/Documents" \
-    --remote "gdrive:Documents" \
-    --delete  # Delete files on remote not present locally
+python rclone-wrapper.py sync --config-dir config_examples
 ```
 
 **Features:**
@@ -108,15 +135,10 @@ Bidirectional sync with conflict detection:
 
 ```bash
 # First run (creates baseline)
-python cli.py bisync \
-    --path1 "D:/Work" \
-    --path2 "gdrive:Work" \
-    --resync  # Force resync (first time or after changes)
+python rclone-wrapper.py bisync --config-dir config_examples --resync
 
 # Subsequent runs (incremental sync)
-python cli.py bisync \
-    --path1 "D:/Work" \
-    --path2 "gdrive:Work"
+python rclone-wrapper.py bisync --config-dir config_examples
 ```
 
 **Features:**
@@ -136,118 +158,122 @@ python cli.py bisync \
 Compare local and remote directories:
 
 ```bash
-python cli.py compare \
-    --local "D:/Documents" \
-    --remote "gdrive:Documents" \
-    --output comparison.json
+python rclone-wrapper.py compare --config-dir config_examples
 ```
 
-**Output:**
-```json
-{
-  "only_in_local": ["file1.txt", "folder/"],
-  "only_in_remote": ["file2.txt"],
-  "different": [
-    {
-      "path": "report.pdf",
-      "local_size": 12345,
-      "remote_size": 12340,
-      "local_time": "2026-01-01T10:00:00",
-      "remote_time": "2026-01-01T09:55:00"
-    }
-  ]
-}
-```
+**Features:**
+- Detects missing files (in both directions)
+- Identifies modified files (size/time differences)
+- One-way or two-way comparison
+- Comprehensive JSON reports in `logs/`
+
+**Configuration:** `config_examples/compare.json`
+
+See [examples/example_compare.py](examples/example_compare.py) for Python API usage.
 
 ## 🔧 Advanced Usage
 
 ### Python API
 
 ```python
-from rclone_wrapper.operations import BisyncOperation
-from rclone_wrapper.config import Config
+from pathlib import Path
+from rclone_wrapper.config import ConfigLoader
+from rclone_wrapper.core.command import CommandExecutor
+from rclone_wrapper.operations import BisyncOperationManager
 
-# Create config
-config = Config(
-    remote="gdrive",
-    log_level="DEBUG",
-    retry_max_attempts=3
+# Load configuration
+loader = ConfigLoader(Path("config_examples"))
+common_config, bisync_config = loader.load_bisync()
+
+# Create executor and manager
+executor = CommandExecutor()
+manager = BisyncOperationManager(
+    common_config=common_config,
+    bisync_config=bisync_config,
+    executor=executor
 )
 
-# Run bisync
-bisync = BisyncOperation(config)
-result = bisync.execute(
-    path1="D:/Work",
-    path2="gdrive:Work",
-    resync=False
-)
+# Run bisync for all configured pairs
+manager.bisync_all_stream()
 
-if result.success:
-    print(f"Synced successfully: {result.files_transferred} files")
-else:
-    print(f"Error: {result.error_message}")
+# Or resync all
+manager.resync_all()
 ```
+
+See [examples/](examples/) for complete working examples.
 
 ### Error Handling
 
 ```python
 from rclone_wrapper.exceptions import (
-    RcloneException,
-    BisyncConflictError,
-    RetryableError
+    RcloneError,
+    RcloneCriticalError,
+    RcloneRetryableError,
 )
 
 try:
-    result = bisync.execute(path1="...", path2="...")
-except BisyncConflictError as e:
-    print(f"Conflicts detected: {e.conflicts}")
-    # Handle conflicts
-except RetryableError as e:
-    print(f"Transient error (will retry): {e}")
-except RcloneException as e:
-    print(f"Fatal error: {e}")
+    manager.bisync_all_stream()
+except RcloneCriticalError as e:
+    print(f"Critical error - resync needed: {e}")
+    # Run resync
+except RcloneRetryableError as e:
+    print(f"Transient error (will auto-retry): {e}")
+except RcloneError as e:
+    print(f"Rclone error: {e}")
 ```
 
-### JSON Log Parsing
+### Analyzing Reports
 
 ```python
-from rclone_wrapper.logging import JSONLogParser
+import json
+from pathlib import Path
 
-# Parse rclone JSON log
-parser = JSONLogParser()
-entries = parser.parse_file("logs/rclone_20260101.log")
+# Read generated report
+report_file = max(Path("logs").glob("*_analysis.json"))
+with open(report_file) as f:
+    report = json.load(f)
 
-# Analyze
-errors = [e for e in entries if e.level == "error"]
-transfers = [e for e in entries if e.stats]
+# Extract statistics
+print(f"Session: {report['session_name']}")
+print(f"Duration: {report['summary']['elapsed_time']}s")
+print(f"Operations: {report['summary']['total_operations']}")
+print(f"Errors: {report['summary']['errors']}")
+
+# Check specific operations
+for cmd in report['commands']:
+    print(f"{cmd['command']}: {cmd['source']} -> {cmd['destination']}")
 ```
 
-## 📊 Configuration Reference
+## 📊 Configuration
 
-Full config example (`config/backup.json`):
+All operations use JSON configuration files. Examples are provided in `config_examples/`:
 
+- **`common.json`** - Shared settings (remote, log level, transfers, etc.)
+- **`sync.json`** - One-way sync configuration
+- **`bisync.json`** - Bidirectional sync with conflict resolution
+- **`compare.json`** - Directory comparison settings
+- **`backup_extended.json`** - Multi-archive backup with retention
+
+See [config_examples/CONFIG_REFERENCE.md](config_examples/CONFIG_REFERENCE.md) for complete documentation.
+
+**Quick Example** (`config/sync.json`):
 ```json
 {
   "remote": "gdrive",
-  "dest_base": "Backup",
-  "folders": [
-    "D:/Documents",
-    "D:/Photos"
-  ],
-  "sync_folders": [
-    {"local": "D:/Projects", "remote": "Projects"}
-  ],
-  "retention_days": 30,
+  "log_dir": "logs",
   "log_level": "INFO",
-  "rclone_path": "rclone",
-  "retry_max_attempts": 3,
-  "retry_initial_delay": 1.0,
-  "retry_max_delay": 60.0,
-  "retry_backoff_factor": 2.0
+  "folders": [
+    {
+      "source": "D:/Documents",
+      "destination": "gdrive:Backup/Documents"
+    },
+    {
+      "source": "D:/Photos",
+      "destination": "gdrive:Backup/Photos"
+    }
+  ]
 }
 ```
-
-See [config_examples/](config_examples/) for more examples.
 
 ## 🧪 Testing
 
@@ -266,17 +292,20 @@ pytest tests/test_bisync.py -v
 
 ```
 rclone-wrapper/
-├── rclone_wrapper/          # Main package
-│   ├── core/               # Core executor and builder
-│   ├── domain/             # Domain models and exceptions
-│   ├── logging/            # JSON log parser
-│   ├── operations/         # Bisync, sync, backup, compare
-│   ├── config/             # Configuration management
-│   └── utils.py
-├── cli.py                  # Command-line interface
-├── config_examples/        # Example configurations
-├── tests/                  # Test suite
-└── examples/               # Usage examples
+├── rclone_wrapper/              # Main package
+│   ├── config/                  # Configuration layer (Pydantic models)
+│   ├── core/                    # Core layer (CommandBuilder, Executor)
+│   ├── domain/                  # Domain layer (models, enums, value objects)
+│   ├── logging/                 # Logging layer (parsers, formatters, analyzer)
+│   ├── operations/              # Operations layer (managers for sync/bisync/compare)
+│   ├── backup_extended.py       # Backup extended operation manager
+│   ├── exceptions.py            # Exception hierarchy
+│   └── __main__.py              # Module entry point
+├── rclone-wrapper.py            # CLI entry point (direct execution)
+├── config_examples/             # Example configurations + reference docs
+├── examples/                    # Working examples (Python + CLI demos)
+├── tests/                       # Test suite
+└── pyproject.toml               # Project configuration
 ```
 
 ## 🤝 Contributing

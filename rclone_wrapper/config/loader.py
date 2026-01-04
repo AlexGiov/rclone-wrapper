@@ -14,7 +14,6 @@ from pydantic import BaseModel, ValidationError
 
 from ..exceptions import RcloneConfigError
 from .models import (
-    BackupConfig,
     BackupExtendedConfig,
     BisyncConfig,
     CommonConfig,
@@ -113,20 +112,6 @@ class ConfigLoader:
         common = self.load_common()
         compare = self._load_config("compare.json", CompareConfig)
         return common, compare
-
-    def load_backup(self) -> tuple[CommonConfig, BackupConfig]:
-        """
-        Load backup configuration (common + backup).
-
-        Returns:
-            Tuple of (CommonConfig, BackupConfig)
-
-        Raises:
-            RcloneConfigError: If config files not found or invalid
-        """
-        common = self.load_common()
-        backup = self._load_config("backup.json", BackupConfig)
-        return common, backup
 
     def load_backup_extended(self) -> tuple[CommonConfig, BackupExtendedConfig]:
         """

@@ -12,11 +12,20 @@
   },
   "folders": [
     {
-      "source": "\\\\192.168.20.111\\wrk\\atlas\\_alex_giov_\\guitar\\guitar\\youtube backingtrack\\elevated",
-      "destination": "agdrive:atlas\\_alex_giov_\\guitar\\guitar\\youtube backingtrack\\elevated",
-      "checksum": false,
-      "size_only": false,
-      "modtime_and_size": true
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\1",
+      "destination": "agdrive:backuptest\\1"
+    },
+    {
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\2",
+      "destination": "agdrive:backuptest\\2",
+      "filters": {
+        "exclude": [
+          "node_modules/**",
+          "*.tmp"
+        ]
+      },
+      "size_only": true,
+      "checksum": false
     }
   ]
 }

@@ -25,7 +25,6 @@ __all__ = [
     "SyncConfig",
     "BisyncConfig",
     "CompareConfig",
-    "BackupConfig",
     "ArchiveConfig",
     "BackupExtendedConfig",
 ]
@@ -332,25 +331,6 @@ class CompareConfig(BaseModel):
                         f"does not match configured remote '{remote}'"
                     )
         return v
-
-
-class BackupConfig(BaseModel):
-    """
-    Configuration for backup operations.
-
-    Attributes:
-        dest_base: Base destination path
-        zip_prefix: Prefix for backup ZIP files
-        retention_days: Number of days to retain backups
-        folders: List of folders to backup
-    """
-
-    dest_base: str = Field(..., min_length=1)
-    zip_prefix: str = Field(default="backup", min_length=1)
-    retention_days: int = Field(default=DEFAULT_RETENTION_DAYS, ge=1, le=365)
-    folders: list[str] = Field(default_factory=list)
-
-    model_config = ConfigDict(validate_assignment=True)
 
 
 class ArchiveConfig(BaseModel):

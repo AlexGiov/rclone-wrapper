@@ -24,7 +24,6 @@ __author__ = "Alex"
 # Config layer
 from .config import (
     ArchiveConfig,
-    BackupConfig,
     BackupExtendedConfig,
     BisyncConfig,
     CommonConfig,
@@ -92,7 +91,6 @@ __all__ = [
     "SyncConfig",
     "BisyncConfig",
     "CompareConfig",
-    "BackupConfig",
     "ArchiveConfig",
     "BackupExtendedConfig",
     "ConfigLoader",

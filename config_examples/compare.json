@@ -13,12 +13,12 @@
   },
   "folders": [
     {
-      "source": "\\\\192.168.20.111\\wrk\\atlas\\_alex_giov_\\guitar\\guitar_new\\backingtracks",
-      "destination": "agdrive:backuptest\\atlas\\_alex_giov_\\guitar\\guitar_new\\backingtracks"
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\1",
+      "destination": "agdrive:backuptest\\1"
     },
     {
-      "source": "\\\\192.168.20.111\\wrk\\backuptest\\dummy-folder",
-      "destination": "agdrive:backuptest\\dummy-folder",
+      "source": "\\\\192.168.20.111\\wrk\\backuptest\\2",
+      "destination": "agdrive:backuptest\\2",
       "one_way": true,
       "download": true
     }

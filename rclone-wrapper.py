@@ -7,19 +7,24 @@ from pathlib import Path
 
 from rclone_wrapper import (
     __version__,
-    BackupManager,
-    SyncManager,
-    BisyncManager,
-    load_backup_config,
-    load_sync_config,
-    load_bisync_config,
+    ConfigLoader,
     RcloneError,
 )
-from rclone_wrapper.utils import setup_logging
-from rclone_wrapper.core import ensure_rclone
+from rclone_wrapper.core.command import CommandExecutor
+from rclone_wrapper.operations import (
+    SyncOperationManager,
+    BisyncOperationManager,
+    CompareOperationManager,
+)
+from rclone_wrapper.backup_extended import BackupExtendedManager
 
+# Setup basic logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
-DEFAULT_CONFIG_DIR = Path('config')
+DEFAULT_CONFIG_DIR = Path('config_examples')
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -70,16 +75,11 @@ def create_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
     
     # Backup command
-    backup_parser = subparsers.add_parser('backup', help='Backup folders to remote')
+    backup_parser = subparsers.add_parser('backup', help='Backup folders with ZIP archiving')
     backup_parser.add_argument(
         '--no-cleanup',
         action='store_true',
         help='Skip cleanup of old backups'
-    )
-    backup_parser.add_argument(
-        'folders',
-        nargs='*',
-        help='Folders to backup (overrides config)'
     )
     
     # Sync command
@@ -101,17 +101,23 @@ def create_parser() -> argparse.ArgumentParser:
         help='Force resync operation'
     )
     bisync_parser.add_argument(
-        '--no-auto-resync',
-        action='store_true',
-        help='Disable automatic resync on critical errors'
-    )
-    bisync_parser.add_argument(
         '--path1',
         help='First sync path (local)'
     )
     bisync_parser.add_argument(
         '--path2',
         help='Second sync path (remote)'
+    )
+    
+    # Compare command
+    compare_parser = subparsers.add_parser('compare', help='Compare directories')
+    compare_parser.add_argument(
+        '--local',
+        help='Local folder'
+    )
+    compare_parser.add_argument(
+        '--remote',
+        help='Remote folder'
     )
     
     # Version info
@@ -123,99 +129,131 @@ def create_parser() -> argparse.ArgumentParser:
 def cmd_backup(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Execute backup command."""
     try:
-        # Load backup configuration
-        common_config, backup_config = load_backup_config(args.config_dir)
+        loader = ConfigLoader(args.config_dir)
+        common_config, backup_extended_config = loader.load_backup_extended()
         
-        # Override dry-run from CLI
         if args.dry_run:
             common_config.dry_run = True
         
-        manager = BackupManager(common_config, backup_config, args.rclone, logger)
+        executor = CommandExecutor()
+        manager = BackupExtendedManager(
+            common_config=common_config,
+            backup_extended_config=backup_extended_config,
+            executor=executor,
+            rclone_path=Path(args.rclone) if args.rclone else None,
+        )
         
-        folders = args.folders if args.folders else None
         cleanup = not args.no_cleanup
+        manager.backup_all(cleanup=cleanup)
         
-        manager.backup_folders(folders, cleanup)
-        
-        logger.info("Backup completed successfully")
+        logger.info("✅ Backup completed successfully")
         return 0
     
     except Exception as e:
-        logger.error(f"Backup failed: {e}")
+        logger.error(f"❌ Backup failed: {e}")
         return 1
 
 
 def cmd_sync(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Execute sync command."""
     try:
-        # Load sync configuration
-        common_config, sync_config = load_sync_config(args.config_dir)
+        loader = ConfigLoader(args.config_dir)
+        common_config, sync_config = loader.load_sync()
         
         if args.dry_run:
             common_config.dry_run = True
         
-        manager = SyncManager(common_config, sync_config, args.rclone, logger)
+        executor = CommandExecutor()
+        manager = SyncOperationManager(
+            common_config=common_config,
+            sync_config=sync_config,
+            executor=executor,
+            rclone_path=Path(args.rclone) if args.rclone else None,
+        )
         
-        if args.source and args.dest:
-            # Single sync
-            manager.sync_folder(args.source, args.dest)
-        else:
-            # Sync all configured folders
-            manager.sync_folders()
+        manager.sync_all()
         
-        logger.info("Sync completed successfully")
+        logger.info("✅ Sync completed successfully")
         return 0
     
     except Exception as e:
-        logger.error(f"Sync failed: {e}")
+        logger.error(f"❌ Sync failed: {e}")
         return 1
 
 
 def cmd_bisync(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Execute bisync command."""
     try:
-        # Load bisync configuration
-        common_config, bisync_config = load_bisync_config(args.config_dir)
+        loader = ConfigLoader(args.config_dir)
+        common_config, bisync_config = loader.load_bisync()
         
         if args.dry_run:
             common_config.dry_run = True
         
-        manager = BisyncManager(common_config, bisync_config, args.rclone, logger)
+        executor = CommandExecutor()
+        manager = BisyncOperationManager(
+            common_config=common_config,
+            bisync_config=bisync_config,
+            executor=executor,
+            rclone_path=Path(args.rclone) if args.rclone else None,
+        )
         
-        if args.path1 and args.path2:
-            # Single bisync
-            if args.resync:
-                manager.resync(args.path1, args.path2, force=True)
-            else:
-                auto_resync = not args.no_auto_resync
-                manager.sync(args.path1, args.path2, auto_resync)
+        if args.resync:
+            manager.resync_all()
         else:
-            # Bisync all configured folders
-            manager.sync_all()
+            manager.bisync_all_stream()
         
-        logger.info("Bisync completed successfully")
+        logger.info("✅ Bisync completed successfully")
         return 0
     
     except Exception as e:
-        logger.error(f"Bisync failed: {e}")
+        logger.error(f"❌ Bisync failed: {e}")
+        return 1
+
+
+def cmd_compare(args: argparse.Namespace, logger: logging.Logger) -> int:
+    """Execute compare command."""
+    try:
+        loader = ConfigLoader(args.config_dir)
+        common_config, compare_config = loader.load_compare()
+        
+        if args.dry_run:
+            common_config.dry_run = True
+        
+        executor = CommandExecutor()
+        manager = CompareOperationManager(
+            common_config=common_config,
+            compare_config=compare_config,
+            executor=executor,
+            rclone_path=Path(args.rclone) if args.rclone else None,
+        )
+        
+        manager.compare_all()
+        
+        logger.info("✅ Compare completed successfully")
+        return 0
+    
+    except Exception as e:
+        logger.error(f"❌ Compare failed: {e}")
         return 1
 
 
 def cmd_info(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Show version information."""
     try:
-        rclone = ensure_rclone(args.rclone)
+        import subprocess
         
-        from rclone_wrapper.core import RcloneCommand
-        from rclone_wrapper.config import CommonConfig
+        rclone_path = args.rclone if args.rclone else "rclone"
         
-        # Minimal config for version check
-        config = CommonConfig(remote="test")
-        cmd = RcloneCommand(config, args.rclone, logger)
+        result = subprocess.run(
+            [str(rclone_path), "version"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
         
         print(f"rclone_wrapper version: {__version__}")
-        print(f"rclone executable: {rclone}")
-        print(f"rclone version: {cmd.version()}")
+        print(f"rclone version:\n{result.stdout}")
         
         return 0
     
@@ -229,18 +267,7 @@ def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     
-    # Setup logging
-    console_level = logging.INFO if args.verbose else logging.WARNING
-    
-    if args.log_file:
-        log_file = args.log_file
-    else:
-        log_file = Path('logs') / 'rclone_wrapper.log'
-    
-    logger = setup_logging(
-        log_file=log_file,
-        console_level=console_level
-    )
+    logger = logging.getLogger(__name__)
     
     # Show help if no command
     if not args.command:
@@ -261,6 +288,9 @@ def main() -> int:
         
         elif args.command == 'bisync':
             return cmd_bisync(args, logger)
+        
+        elif args.command == 'compare':
+            return cmd_compare(args, logger)
         
         else:
             parser.print_help()

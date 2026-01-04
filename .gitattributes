@@ -1,0 +1,23 @@
+# Auto-detect text files and normalize line endings to LF on checkin
+* text=auto
+
+# Shell scripts must use LF (Unix line endings)
+*.sh text eol=lf
+
+# Batch scripts must use CRLF (Windows line endings)
+*.bat text eol=crlf
+
+# Python files use LF (standard)
+*.py text eol=lf
+
+# JSON/config files use LF
+*.json text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.zip binary
+*.gz binary
+*.tar binary
+*.png binary
+*.jpg binary

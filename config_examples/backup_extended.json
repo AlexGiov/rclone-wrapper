@@ -1,5 +1,5 @@
 {
-  "dest_base": "backuptest/archives",
+  "dest_base": "backuptest",
   "filters": {
     "exclude": [
       "*.tmp",
@@ -27,10 +27,10 @@
   "archives": [
     {
       "source": [
-        "C:\\Users\\alexgiov\\Desktop\\trash\\a1",
-        "C:\\Users\\alexgiov\\Desktop\\trash\\a2"
+        "\\\\192.168.20.111\\wrk\\backuptest\\1",
+        "\\\\192.168.20.111\\wrk\\backuptest\\2"
       ],
-      "destination": "a1a2_archive",
+      "destination": "b1",
       "filters": {
         "exclude": [
           "*.log"
@@ -53,10 +53,10 @@
     },
     {
       "source": [
-        "C:\\Users\\alexgiov\\Desktop\\trash\\a3",
-        "C:\\Users\\alexgiov\\Desktop\\trash\\a4"
+        "\\\\192.168.20.111\\wrk\\backuptest\\3",
+        "\\\\192.168.20.111\\wrk\\backuptest\\4"
       ],
-      "destination": "a3a4_archive",
+      "destination": "b2",
       "filters": null,
       "retention_days": 7,
       "merge_zip": false,
@@ -66,9 +66,9 @@
     },
     {
       "source": [
-        "C:\\Users\\alexgiov\\Desktop\\trash\\a5"
+        "\\\\192.168.20.111\\wrk\\backuptest\\5"
       ],
-      "destination": "a5_archive",
+      "destination": "b3",
       "filters": null,
       "retention_days": 7,
       "merge_zip": false,

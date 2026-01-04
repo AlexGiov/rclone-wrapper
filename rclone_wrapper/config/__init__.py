@@ -8,7 +8,6 @@ and utilities for loading and validating configuration files.
 from .loader import DEFAULT_CONFIG_DIR, ConfigLoader
 from .models import (
     ArchiveConfig,
-    BackupConfig,
     BackupExtendedConfig,
     BisyncConfig,
     CommonConfig,
@@ -26,7 +25,6 @@ __all__ = [
     "SyncConfig",
     "BisyncConfig",
     "CompareConfig",
-    "BackupConfig",
     "ArchiveConfig",
     "BackupExtendedConfig",
     # Loader
