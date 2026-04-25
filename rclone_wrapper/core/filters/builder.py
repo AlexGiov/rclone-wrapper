@@ -61,11 +61,11 @@ class FilterBuilder:
 
         # Exclude patterns
         for pattern in self.filters.exclude:
-            args.extend(["--exclude", pattern])
+            args.extend(["--exclude", pattern.replace("\\", "/")])
 
         # Include patterns
         for pattern in self.filters.include:
-            args.extend(["--include", pattern])
+            args.extend(["--include", pattern.replace("\\", "/")])
 
         # Exclude directories (automatically add /** for recursive exclusion)
         for dir_name in self.filters.exclude_dirs:

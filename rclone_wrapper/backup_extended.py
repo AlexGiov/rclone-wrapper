@@ -282,7 +282,10 @@ class BackupExtendedManager(BaseOperationManager):
         )
         
         # Always create single ZIP for all folders in this archive
-        zip_name = f"{archive.destination}_{timestamp}.zip"
+        # Name format: <source_folder>_backup_<timestamp>.zip
+        source_folder = self._sanitize_name(archive.source[0])
+        local_name = f"{source_folder}_backup"
+        zip_name = f"{local_name}_{timestamp}.zip"
         output_path = Path(zip_name)
         
         result = self._create_single_zip(
@@ -316,7 +319,9 @@ class BackupExtendedManager(BaseOperationManager):
             True if upload successful, False otherwise
         """
         # Build destination path: dest_base/destination/
-        remote_path = f"{self.backup_extended_config.dest_base}/{archive.destination}"
+        # Normalize destination separators for remote path (always use /)
+        remote_dest = archive.destination.replace("\\", "/")
+        remote_path = f"{self.backup_extended_config.dest_base}/{remote_dest}"
         dest = f"{self.common_config.remote}:{remote_path}"
         
         logger.info(f"Uploading: {local_path.name} -> {dest}")
@@ -388,7 +393,9 @@ class BackupExtendedManager(BaseOperationManager):
         retention_days = self._get_effective_retention(archive)
         
         # Build remote path
-        remote_path = f"{self.backup_extended_config.dest_base}/{archive.destination}"
+        # Normalize destination separators for remote path (always use /)
+        remote_dest = archive.destination.replace("\\", "/")
+        remote_path = f"{self.backup_extended_config.dest_base}/{remote_dest}"
         dest = f"{self.common_config.remote}:{remote_path}"
         
         # Handle retention_days = 0 (keep only latest)
@@ -398,8 +405,10 @@ class BackupExtendedManager(BaseOperationManager):
             return
         
         # Normal retention cleanup
-        # Pattern: {destination}_*.zip (one ZIP per archive)
-        pattern = f"{archive.destination}_*.zip"
+        # Pattern must match the filename used during upload: <source_folder>_backup_*.zip
+        source_folder = self._sanitize_name(archive.source[0])
+        local_name = f"{source_folder}_backup"
+        pattern = f"{local_name}_*.zip"
         
         logger.info(
             f"Cleaning up '{archive.destination}' backups older than {retention_days} days"

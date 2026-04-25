@@ -34,7 +34,7 @@ Type-safe, robust wrapper for rclone with comprehensive error handling, retry lo
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/rclone-wrapper.git
+git clone https://github.com/yourusername/rclone-wrapper.git	
 cd rclone-wrapper
 
 # Install dependencies
