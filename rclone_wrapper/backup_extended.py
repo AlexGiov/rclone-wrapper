@@ -121,11 +121,12 @@ class BackupExtendedManager(BaseOperationManager):
             if retention_days is not None and retention_days > 0:
                 builder.arguments(f"--min-age={retention_days}d")
             
-            # Pattern filter
+            # Pattern filter - use --filter to avoid rclone warning about
+            # mixing --include and --exclude (order is indeterminate)
             pattern = kwargs.get("pattern")
             if pattern:
-                builder.arguments(f"--include={pattern}")
-                builder.arguments("--exclude=*")  # Exclude everything else
+                builder.arguments(f"--filter=+ {pattern}")
+                builder.arguments("--filter=- *")
             
             builder.json_log()
         

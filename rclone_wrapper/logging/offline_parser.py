@@ -131,7 +131,7 @@ class RcloneOfflineParser:
                 try:
                     msg = json.loads(line)
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Invalid JSON at line {line_num}: {e}")
+                    logger.debug(f"Non-JSON line at line {line_num} (skipping): {e}")
                     continue
                 
                 # Check for command separator
@@ -164,7 +164,7 @@ class RcloneOfflineParser:
                 try:
                     msg = json.loads(line)
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Invalid JSON at line {line_num}: {e}")
+                    logger.debug(f"Non-JSON line at line {line_num} (skipping): {e}")
                     continue
                 
                 # Filter by ignore patterns

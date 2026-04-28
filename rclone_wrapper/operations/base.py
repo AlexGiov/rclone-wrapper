@@ -55,7 +55,7 @@ class BaseOperationManager(ABC):
         """
         self.common_config = common_config
         self.executor = executor
-        self.rclone_path = rclone_path
+        self.rclone_path = rclone_path or Path(common_config.rclone_path)
         self.log_dir = log_dir or Path("logs")
 
     def _apply_common_settings(

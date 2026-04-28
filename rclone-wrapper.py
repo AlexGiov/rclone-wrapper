@@ -77,13 +77,25 @@ def create_parser() -> argparse.ArgumentParser:
     # Backup command
     backup_parser = subparsers.add_parser('backup', help='Backup folders with ZIP archiving')
     backup_parser.add_argument(
+        '--config-dir',
+        type=Path,
+        default=argparse.SUPPRESS,
+        help='Configuration directory path (overrides global --config-dir)'
+    )
+    backup_parser.add_argument(
         '--no-cleanup',
         action='store_true',
         help='Skip cleanup of old backups'
     )
-    
+
     # Sync command
     sync_parser = subparsers.add_parser('sync', help='One-way sync to remote')
+    sync_parser.add_argument(
+        '--config-dir',
+        type=Path,
+        default=argparse.SUPPRESS,
+        help='Configuration directory path (overrides global --config-dir)'
+    )
     sync_parser.add_argument(
         '--source',
         help='Local source folder'
@@ -92,9 +104,15 @@ def create_parser() -> argparse.ArgumentParser:
         '--dest',
         help='Remote destination'
     )
-    
+
     # Bisync command
     bisync_parser = subparsers.add_parser('bisync', help='Bidirectional sync')
+    bisync_parser.add_argument(
+        '--config-dir',
+        type=Path,
+        default=argparse.SUPPRESS,
+        help='Configuration directory path (overrides global --config-dir)'
+    )
     bisync_parser.add_argument(
         '--resync',
         action='store_true',
@@ -108,9 +126,15 @@ def create_parser() -> argparse.ArgumentParser:
         '--path2',
         help='Second sync path (remote)'
     )
-    
+
     # Compare command
     compare_parser = subparsers.add_parser('compare', help='Compare directories')
+    compare_parser.add_argument(
+        '--config-dir',
+        type=Path,
+        default=argparse.SUPPRESS,
+        help='Configuration directory path (overrides global --config-dir)'
+    )
     compare_parser.add_argument(
         '--local',
         help='Local folder'
@@ -119,7 +143,7 @@ def create_parser() -> argparse.ArgumentParser:
         '--remote',
         help='Remote folder'
     )
-    
+
     # Version info
     info_parser = subparsers.add_parser('info', help='Show version information')
     
@@ -241,9 +265,11 @@ def cmd_compare(args: argparse.Namespace, logger: logging.Logger) -> int:
 def cmd_info(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Show version information."""
     try:
+        import shutil
         import subprocess
         
         rclone_path = args.rclone if args.rclone else "rclone"
+        resolved = shutil.which(str(rclone_path)) or str(rclone_path)
         
         result = subprocess.run(
             [str(rclone_path), "version"],
@@ -253,6 +279,7 @@ def cmd_info(args: argparse.Namespace, logger: logging.Logger) -> int:
         )
         
         print(f"rclone_wrapper version: {__version__}")
+        print(f"rclone path: {resolved}")
         print(f"rclone version:\n{result.stdout}")
         
         return 0
