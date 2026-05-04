@@ -11,6 +11,7 @@ from rclone_wrapper import (
     RcloneError,
 )
 from rclone_wrapper.core.command import CommandExecutor
+from rclone_wrapper.core.remote import ensure_rclone
 from rclone_wrapper.operations import (
     SyncOperationManager,
     BisyncOperationManager,
@@ -265,25 +266,34 @@ def cmd_compare(args: argparse.Namespace, logger: logging.Logger) -> int:
 def cmd_info(args: argparse.Namespace, logger: logging.Logger) -> int:
     """Show version information."""
     try:
-        import shutil
         import subprocess
-        
-        rclone_path = args.rclone if args.rclone else "rclone"
-        resolved = shutil.which(str(rclone_path)) or str(rclone_path)
-        
+
+        # Priority: CLI --rclone > common.json rclone_path > system PATH
+        if args.rclone:
+            rclone_path = Path(args.rclone)
+        else:
+            try:
+                loader = ConfigLoader(args.config_dir)
+                common_config = loader.load_common()
+                rclone_path = Path(common_config.rclone_path)
+            except Exception:
+                rclone_path = None
+
+        resolved = ensure_rclone(rclone_path)
+
         result = subprocess.run(
-            [str(rclone_path), "version"],
+            [str(resolved), "version"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
-        
+
         print(f"rclone_wrapper version: {__version__}")
         print(f"rclone path: {resolved}")
         print(f"rclone version:\n{result.stdout}")
-        
+
         return 0
-    
+
     except Exception as e:
         logger.error(f"Failed to get version info: {e}")
         return 1
