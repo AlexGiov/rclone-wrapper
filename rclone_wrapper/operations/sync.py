@@ -14,6 +14,8 @@ from ..core.command import CommandBuilder, CommandExecutor
 from ..logging.output_analyzer import RcloneOutputAnalyzer
 from .base import BaseOperationManager
 
+from ..exceptions import RcloneError
+
 __all__ = ["SyncOperationManager"]
 
 logger = logging.getLogger(__name__)
@@ -119,7 +121,9 @@ class SyncOperationManager(BaseOperationManager):
             return
         
         logger.info(f"Starting batch sync: {len(self.sync_config.folders)} folder pairs")
-        
+
+        failed_pairs: list[str] = []
+
         # RcloneOutputAnalyzer handles ALL logging and parsing
         with RcloneOutputAnalyzer(self.log_dir, session_name="sync_batch") as analyzer:
             for folder_pair in self.sync_config.folders:
@@ -161,6 +165,7 @@ class SyncOperationManager(BaseOperationManager):
                         logger.error(f"✗ Sync failed: {folder_pair.source} -> {folder_pair.destination}")
                         
                 except Exception as e:
+                    failed_pairs.append(folder_pair.source)
                     logger.error(f"Error syncing {folder_pair.source}: {e}")
                     
                     # Add error to analyzer
@@ -177,3 +182,10 @@ class SyncOperationManager(BaseOperationManager):
         
         # Report generated automatically by analyzer on context exit
         logger.info("Batch sync completed - analysis report generated")
+
+        if failed_pairs:
+            total = len(self.sync_config.folders)
+            raise RcloneError(
+                f"Batch sync failed: {len(failed_pairs)}/{total} pairs failed: "
+                + ", ".join(failed_pairs)
+            )
