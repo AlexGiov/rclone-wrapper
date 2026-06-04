@@ -29,6 +29,8 @@ from ..core.command import CommandBuilder, CommandExecutor
 from ..logging.output_analyzer import RcloneOutputAnalyzer
 from .base import BaseOperationManager
 
+from ..exceptions import RcloneError
+
 __all__ = ["BisyncOperationManager"]
 
 logger = logging.getLogger(__name__)
@@ -192,6 +194,8 @@ class BisyncOperationManager(BaseOperationManager):
 
         logger.info(f"🌊 Stream-based bisync: {len(self.bisync_config.folders)} folder pairs")
         
+        failed_pairs: list[str] = []
+
         # RcloneOutputAnalyzer handles ALL logging and parsing
         with RcloneOutputAnalyzer(self.log_dir, session_name="bisync_batch") as analyzer:
             # Process each pair
@@ -239,6 +243,8 @@ class BisyncOperationManager(BaseOperationManager):
                 except Exception as e:
                     logger.error(f"❌ Error in bisync {folder_pair.source}: {e}")
                     
+                    failed_pairs.append(folder_pair.source)
+
                     # Add error to analyzer
                     analyzer.add_output(
                         f'{{"level":"error","msg":"Bisync failed: {str(e)}","source":"bisync_all_stream"}}',
@@ -262,6 +268,13 @@ class BisyncOperationManager(BaseOperationManager):
         
         # Report generated automatically by analyzer on context exit
         logger.info("Batch bisync completed - analysis report generated")
+
+        if failed_pairs:
+            total = len(self.bisync_config.folders)
+            raise RcloneError(
+                f"Batch bisync failed: {len(failed_pairs)}/{total} pairs failed: "
+                + ", ".join(failed_pairs)
+            )
 
     def resync_all(self) -> None:
         """

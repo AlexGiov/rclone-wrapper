@@ -14,6 +14,8 @@ from ..core.command import CommandBuilder, CommandExecutor
 from ..logging.output_analyzer import RcloneOutputAnalyzer
 from .base import BaseOperationManager
 
+from ..exceptions import RcloneError, RcloneRetryableError
+
 __all__ = ["CompareOperationManager"]
 
 logger = logging.getLogger(__name__)
@@ -133,6 +135,8 @@ class CompareOperationManager(BaseOperationManager):
         
         logger.info(f"Starting batch compare: {len(self.compare_config.folders)} folder pairs")
         
+        failed_pairs: list[str] = []
+
         # RcloneOutputAnalyzer handles ALL logging and parsing
         with RcloneOutputAnalyzer(self.log_dir, session_name="compare_batch") as analyzer:
             for folder_pair in self.compare_config.folders:
@@ -185,9 +189,24 @@ class CompareOperationManager(BaseOperationManager):
                     else:
                         logger.error(f"✗ Compare failed: {folder_pair.source} <-> {folder_pair.destination}")
                         
+                except RcloneRetryableError as e:
+                    # rclone check exit 1 = differences found (expected business outcome, not a retryable error)
+                    analyzer.add_output(
+                        e.stderr or "",
+                        command_info={
+                            "command": "compare",
+                            "source": folder_pair.source,
+                            "destination": folder_pair.destination,
+                            "timestamp": start_time.isoformat(),
+                            "returncode": 1,
+                        }
+                    )
+                    logger.info(f"~ Compare completed with differences: {folder_pair.source} <-> {folder_pair.destination}")
+
                 except Exception as e:
+                    failed_pairs.append(folder_pair.source)
                     logger.error(f"Error comparing {folder_pair.source}: {e}")
-                    
+
                     # Add error to analyzer
                     analyzer.add_output(
                         f'{{"level":"error","msg":"Compare failed: {str(e)}","source":"compare_all"}}',
@@ -199,6 +218,13 @@ class CompareOperationManager(BaseOperationManager):
                             "timestamp": start_time.isoformat(),
                         }
                     )
-        
+
         # Report generated automatically by analyzer on context exit
         logger.info("Batch compare completed - analysis report generated")
+
+        if failed_pairs:
+            total = len(self.compare_config.folders)
+            raise RcloneError(
+                f"Batch compare failed: {len(failed_pairs)}/{total} pairs failed: "
+                + ", ".join(failed_pairs)
+            )
