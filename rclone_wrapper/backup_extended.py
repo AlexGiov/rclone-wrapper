@@ -21,6 +21,7 @@ WORKFLOW:
 import json
 import logging
 import re
+import socket
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -283,9 +284,10 @@ class BackupExtendedManager(BaseOperationManager):
         )
         
         # Always create single ZIP for all folders in this archive
-        # Name format: <source_folder>_backup_<timestamp>.zip
+        # Name format: <hostname>_<source_folder>_backup_<timestamp>.zip
+        hostname = socket.gethostname().lower().replace(" ", "_")
         source_folder = self._sanitize_name(archive.source[0])
-        local_name = f"{source_folder}_backup"
+        local_name = f"{hostname}_{source_folder}_backup"
         zip_name = f"{local_name}_{timestamp}.zip"
         output_path = Path(zip_name)
         
@@ -406,9 +408,10 @@ class BackupExtendedManager(BaseOperationManager):
             return
         
         # Normal retention cleanup
-        # Pattern must match the filename used during upload: <source_folder>_backup_*.zip
+        # Pattern must match the filename used during upload: <hostname>_<source_folder>_backup_*.zip
+        hostname = socket.gethostname().lower().replace(" ", "_")
         source_folder = self._sanitize_name(archive.source[0])
-        local_name = f"{source_folder}_backup"
+        local_name = f"{hostname}_{source_folder}_backup"
         pattern = f"{local_name}_*.zip"
         
         logger.info(
